@@ -44,8 +44,12 @@
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">用户图标：</label>
                     <div class="col-sm-10">
-                        <img src="images/2.jpg" alt="" class="user_pic">
-                        <input type="file" name="user_pic" id="exampleInputFile">
+                        <img src="images/2.jpg" alt="" class="user_pic"><br>
+                        <!-- label的for属性,放一个input的id,那点击这个label就相当于点击了这个input. -->
+                        <label for="exampleInputFile">
+                            <img src="./images/uploadFileIcon.png" alt="">
+                        </label>
+                        <input type="file" style="opacity: 0" name="user_pic" id="exampleInputFile">
                     </div>
                 </div>
 
