@@ -92,11 +92,11 @@
                     <form>
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
-                            <input type="text" class="form-control" id="recipient-name">
+                            <input type="text" class="form-control " id="recipient-name1">
                         </div>
                         <div class="form-group">
                             <label for="message-text" class="control-label">分类别名:</label>
-                            <input type="text" class="form-control" id="recipient-name">
+                            <input type="text" class="form-control" id="recipient-name2">
                         </div>
                     </form>
                 </div>
@@ -119,10 +119,7 @@
             $('#addModal').modal('hide');
         });
 
-        $('#model_add').click(function () {
-            alert('add');
-            $('#addModal').modal('hide');
-        });
+
 
         $('.category_table').delegate('a', 'click', function () {
             if ($(this).hasClass('btn-info')) {
@@ -148,18 +145,6 @@
     <script>
         $(function () {
 
-            $.ajax({
-                type: 'get',
-                url: 'http://localhost:8000/admin/category_search',
-                success: function (backData) {
-                    console.log(backData);
-                    //调用模板方法
-                    var resHtml = template('tmp_cate',backData);
-                    $('tbody').html(resHtml);;
-                }
-            });
-
-
             /*
             获取文章分类信息
               步骤
@@ -167,8 +152,53 @@
               2. 通过ajax获取数据
               3. 数据获取到之后渲染到页面上
               1. 结合模板引擎来渲染
-
             */
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8000/admin/category_search',
+                success: function (backData) {
+                    console.log(backData);
+                    //调用模板方法
+                    var resHtml = template('tmp_cate', backData);
+                    $('tbody').html(resHtml);;
+                }
+            });
+
+
+
+            //点击新增分类那个模态框  中的新增按钮, 获取用户输入的文字名字和类型 发送ajax请求,添加一个文章分类.
+            $('#model_add').click(function () {
+                //获取用户需要新增的类别名字和别名
+                var name = $('#recipient-name1').val();
+                var slug = $('#recipient-name2').val();
+
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:8000/admin/category_add',
+                    data: {
+                        name: name,
+                        slug: slug
+                    },
+                    success: function (backData) {
+                        console.log(backData);
+                        //新增成功后,重新的加载一次类别数据,重新的渲染到页面
+                        $.ajax({
+                            type: 'get',
+                            url: 'http://localhost:8000/admin/category_search',
+                            success: function (backData) {
+                                console.log(backData);
+                                //调用模板方法
+                                var resHtml = template('tmp_cate', backData);
+                                $('tbody').html(resHtml);;
+                            }
+                        });
+                    }
+                });
+                //隐藏模态框
+                $('#addModal').modal('hide');
+            });
+
+
         })
     </script>
 </body>
