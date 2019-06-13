@@ -18,7 +18,7 @@
         <a href="#" class="logo"><img src="images/logo02.png" alt="logo"></a>
         <div class="user_info">
             <img src="images/2.jpg" alt="person">
-            <span>欢迎&nbsp;&nbsp;李思思</span>
+            <span>欢迎&nbsp;&nbsp;<b>李思思</b></span>
             <b>管理员</b>
         </div>
         <div class="menu">
@@ -163,6 +163,32 @@
                  注意:取消a标签的默认跳转
             2.发送ajax请求,请求数据接口返回数据
                 如果成功就跳转到登录页login.html
+            */
+
+
+
+
+
+            //页面一进来就使用本地接口,获取用户信息
+            $.ajax({
+                type:'get',
+                url:'http://localhost:8000/admin/getuser',
+                success:function(backData){
+                    //console.log(backData);
+                    //渲染左边
+                    $('.user_info>span>b').text(backData.data.nickname);
+                    $('.user_info>img').attr('src',backData.data.user_pic);
+                    //渲染右边
+                    $('.user_center_link>img').attr('src',backData.data.user_pic);;
+                }
+            });
+            /*
+            获取用户信息
+            步骤:
+                1. 进入到首页之后
+                2. 通过用户信息接口获取用户的数据
+                3. 渲染到页面上
+
             */
         });
     </script>
