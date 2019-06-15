@@ -73,7 +73,8 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal" id="addCategory">新增分类</a>
+                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal"
+                                id="addCategory">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
@@ -90,13 +91,15 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <!-- 新增一个input标签,用来存放编辑用的id, input标签的type为hidden就是隐藏域 -->
+                        <input type="hidden" name="id"> 
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
-                            <input type="text" class="form-control " id="recipient-name1">
+                            <input type="text" name="name" class="form-control " id="recipient-name1">
                         </div>
                         <div class="form-group">
                             <label for="message-text" class="control-label">分类别名:</label>
-                            <input type="text" class="form-control" id="recipient-name2">
+                            <input type="text" name="slug" class="form-control" id="recipient-name2">
                         </div>
                     </form>
                 </div>
@@ -164,53 +167,87 @@
             getCategory();
 
 
-            //点击新增分类那个模态框  中的新增按钮, 获取用户输入的文字名字和类型 发送ajax请求,添加一个文章分类.
+            //点击那个模态框  中的新增按钮, 获取用户输入的文字名字和类型 发送ajax请求,添加一个文章分类.
             $('#model_add').click(function () {
-                //获取用户需要新增的类别名字和别名
-                var name = $('#recipient-name1').val();
-                var slug = $('#recipient-name2').val();
+                //判断这个按钮是不是保存按钮,
+                if ($(this).hasClass('btn-success')) {
+                    //获取用户修改之后的名字和别名, 然后发送ajax请求,去修改
+                    // var name = $('form [name="name"]').val();
+                    // var slug = $('form [name="slug"]').val();
+                    // var id = $('form [name="id"]').val();
+                    //这个方法是jQuery的方法,可以把form表单中的带有name属性的标签的值获取到.
+                    //获取到后组成一个字符串: name1=value1&name2=value2 这种格式字符串
+                    var data = $('form').serialize(); 
+                    $.ajax({
+                        type:'post',
+                        url:'http://localhost:8000/admin/category_edit',
+                        // data:{
+                        //     id:id,
+                        //     name:name,
+                        //     slug:slug
+                        // },
+                        data:data,
+                        success:function(backData){
+                            console.log(backData);
+                            //修改成功后,重新获取数据,或者搞一个投机: 把这两个数据利用dom操作修改下
+                            getCategory();
+                            //清空模态框中的文本
+                            $('form [name="name"]').val("");
+                            $('form [name="slug"]').val("");
+                            $('form [name="id"]').val("");
+                        }
+                    });
 
-                $.ajax({
-                    type: 'post',
-                    url: 'http://localhost:8000/admin/category_add',
-                    data: {
-                        name: name,
-                        slug: slug
-                    },
-                    success: function (backData) {
-                        console.log(backData);
-                        //新增成功后,重新的加载一次类别数据,重新的渲染到页面
-                        getCategory();
-                    }
-                });
+
+                } else {
+                    //判断这个按钮是不是新增按钮.
+                    //获取用户需要新增的类别名字和别名
+                    var name = $('#recipient-name1').val();
+                    var slug = $('#recipient-name2').val();
+
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8000/admin/category_add',
+                        data: {
+                            name: name,
+                            slug: slug
+                        },
+                        success: function (backData) {
+                            console.log(backData);
+                            //新增成功后,重新的加载一次类别数据,重新的渲染到页面
+                            getCategory();
+                        }
+                    });
+                }
                 //隐藏模态框
                 $('#addModal').modal('hide');
             });
-            
-            
+
+
             //点击新增分类按钮,把模态框还原
-            $('#addCategory').on('click',function(){
+            $('#addCategory').on('click', function () {
                 $('#addModal .modal-title').html('新增分类');
                 $('#model_add').text('新增').removeClass('btn-success');
             });
 
-           
+
 
             //编辑按钮,委托方式设置点击事件.
             $('tbody').on('click', 'a.btn-edit', function () {
                 //把当前要修改的这一条数据的 名字和别名显示在模态框中.
+                var editId = $(this).attr('data-id'); //点击编辑按钮,获取到这个编辑按钮里面用自定义属性date-id保存的id
                 var categorySlug = $(this).parent().prev().text();
                 var categoryName = $(this).parent().prev().prev().text();
                 //console.log(categorySlug+":"+categoryName);
                 $('#recipient-name1').val(categoryName);
                 $('#recipient-name2').val(categorySlug);
-
+                //新增一个input,把刚才求出来的id放到这个input中.
+                $('form [name="id"]').val(editId);
 
                 //修改模态框中的按钮名字和 模态框自己的标题.
                 $('#addModal .modal-title').html('修改分类');
                 $('#model_add').text('保存').addClass('btn-success');
                 $('#addModal').modal('show');
-
 
             });
 
