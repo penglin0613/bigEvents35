@@ -31,9 +31,9 @@
                             <option>爱旅行</option>
                         </select>
                         <select id="selStatus" name="" class="form-control input-sm">
-                            <option>所有状态</option>
-                            <option value="drafted">草稿</option>
-                            <option value="published">已发布</option>
+                            <option value="">所有状态</option>
+                            <option >草稿</option>
+                            <option >已发布</option>
                         </select>
                         <button id="btnSearch" class="btn btn-default btn-sm">筛选</button>
                     </form>
@@ -269,6 +269,23 @@
         </div>
     </div>
 
+    <!-- 文章模板 -->
+    <script id="tmp_article" type="text/html">
+        {{each data v}}
+        <tr>
+            <td>{{v.title}}</td>
+            <td>{{v.author}}</td>
+            <td>{{v.type}}</td>
+            <td class="text-center">{{v.date}}</td>
+            <td class="text-center">{{v.state}}</td>
+            <td class="text-center">
+                <a href="article_edit.html"  data-id="{{v.id}}" class="btn btn-default btn-xs">编辑</a>
+                <a href="javascript:void(0);" data-id="{{v.id}}" class="btn btn-danger btn-xs">删除</a>
+            </td>
+        </tr>
+        {{/each}}
+    </script>
+    <!-- 文章类别分类模板 -->
     <script id="tmp_category" type="text/html">
         <option value="">所有分类</option>
         {{each data v}}
@@ -292,6 +309,37 @@
                 $('#selCategory').html(resHtml);
             }
         });
+
+
+        //给搜索按钮设置点击事件,
+        $('#btnSearch').on('click',function(e){
+            e.preventDefault();
+
+            //获取文字类别和文章状态.
+            var type = $('#selCategory').val();
+            var state = $('#selStatus').val();
+            //发送ajax请求
+            $.ajax({
+                // type:'get',  如果是get请求,可以不写,因为默认就是get请求.
+                url:'http://localhost:8000/admin/search',
+                data:{
+                    key:"",
+                    type:type,
+                    state:state,
+                    page:1,
+                    perpage:5
+                },
+                success:function(backData){
+                    console.log(backData);
+                    if(backData.code == 200){
+                        //利用模板引擎,把他渲染到页面上
+                        var resHtml = template('tmp_article',backData);
+                        $('tbody').html(resHtml);
+                    }
+                }
+            });
+        });
+
 
     </script>
 
