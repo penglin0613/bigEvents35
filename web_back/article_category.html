@@ -128,7 +128,7 @@
             <td>{{$value.name}}</td>
             <td>{{$value.slug}}</td>
             <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;1&quot;,&quot;slug&quot;:&quot;uncategorized&quot;,&quot;name&quot;:&quot;未分类&quot;});" class="btn btn-info btn-xs btn-edit">编辑</a>
+                <a href="javascript:void(0);" data-id="{{$value.id}}"  class="btn btn-info btn-xs btn-edit">编辑</a>
                 <a href="javascript:void(0);" data-id="{{$value.id}}"  class="btn btn-danger btn-xs btn-delete">删除</a>
             </td>
         </tr>
@@ -198,8 +198,15 @@
 
             //编辑按钮,委托方式设置点击事件.
             $('tbody').on('click', 'a.btn-edit', function () {
-                //修改模态框中的按钮名字和 模态框自己的标题.
+                //把当前要修改的这一条数据的 名字和别名显示在模态框中.
+                var categorySlug = $(this).parent().prev().text();
+                var categoryName = $(this).parent().prev().prev().text();
+                //console.log(categorySlug+":"+categoryName);
+                $('#recipient-name1').val(categoryName);
+                $('#recipient-name2').val(categorySlug);
 
+
+                //修改模态框中的按钮名字和 模态框自己的标题.
                 $('#addModal .modal-title').html('修改分类');
                 $('#model_add').text('保存').addClass('btn-success');
                 $('#addModal').modal('show');
