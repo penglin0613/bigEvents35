@@ -137,7 +137,7 @@
             <td>{{$value.slug}}</td>
             <td class="text-center">
                 <a href="javascript:editTr({&quot;id&quot;:&quot;1&quot;,&quot;slug&quot;:&quot;uncategorized&quot;,&quot;name&quot;:&quot;未分类&quot;});" class="btn btn-info btn-xs">编辑</a>
-                <a href="javascript:deleteTr( {{$value.id}} );" class="btn btn-danger btn-xs">删除</a>
+                <a href="javascript:void(0);" data-id="{{$value.id}}"  class="btn btn-danger btn-xs btn-delete">删除</a>
             </td>
         </tr>
         {{/each}}
@@ -145,26 +145,29 @@
     <script>
         $(function () {
 
+            function getCategory() {
             /*
-            获取文章分类信息
+              获取文章分类信息
               步骤
               1. 进入页面之后
               2. 通过ajax获取数据
               3. 数据获取到之后渲染到页面上
               1. 结合模板引擎来渲染
             */
-            $.ajax({
-                type: 'get',
-                url: 'http://localhost:8000/admin/category_search',
-                success: function (backData) {
-                    console.log(backData);
-                    //调用模板方法
-                    var resHtml = template('tmp_cate', backData);
-                    $('tbody').html(resHtml);;
-                }
-            });
+                $.ajax({
+                    type: 'get',
+                    url: 'http://localhost:8000/admin/category_search',
+                    success: function (backData) {
+                        console.log(backData);
+                        //调用模板方法
+                        var resHtml = template('tmp_cate', backData);
+                        $('tbody').html(resHtml);;
+                    }
+                });
+            }
 
-
+            //页面一开始要调用一下getCategory()方法.
+            getCategory();
 
             //点击新增分类那个模态框  中的新增按钮, 获取用户输入的文字名字和类型 发送ajax请求,添加一个文章分类.
             $('#model_add').click(function () {
@@ -182,22 +185,45 @@
                     success: function (backData) {
                         console.log(backData);
                         //新增成功后,重新的加载一次类别数据,重新的渲染到页面
-                        $.ajax({
-                            type: 'get',
-                            url: 'http://localhost:8000/admin/category_search',
-                            success: function (backData) {
-                                console.log(backData);
-                                //调用模板方法
-                                var resHtml = template('tmp_cate', backData);
-                                $('tbody').html(resHtml);;
-                            }
-                        });
+                        getCategory();
                     }
                 });
                 //隐藏模态框
                 $('#addModal').modal('hide');
             });
 
+
+            //删除文章类别
+            //步骤
+            //id 是通过一个自定义属性存在了a标签中.
+            //1.给删除按钮设置点击事件,因为这个a标签所在的tr是通过模板引擎动态生成的,所以使用事件委托的方式来注册点击事件,
+            //2.发送ajax请求,删除对应的这一id的数据.
+            $('tbody').on('click', 'a.btn-delete', function () {
+                var that = $(this);//把当前这个点击的a标签给存起来
+
+                //首先获取一下这个a标签的自定义属性 data-id里面存放的值 (就是你要删除的这一条数据的id)
+                var id = $(this).attr('data-id');
+                //console.log(id);
+                //发送ajax请求.
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:8000/admin/category_delete',
+                    data: {
+                        id: id
+                    },
+                    success: function (backData) {
+                        console.log(backData);
+                        if(backData.code == 200){
+                            //删除成功后,再重新的获取一次 文字类别的数据.
+                            //getCategory();
+                            //思考题:
+                            //现在删除成功要重新渲染看最新的数据,但是如果这个数据很大,重新渲染就会很消耗时间.
+                            //可以这样,既然是删除成功,那数据肯定是已经被删掉了的,那就直接把这一行从dom树中移除就ok
+                            that.parent().parent().remove();
+                        }
+                    }
+                });
+            });
 
         })
     </script>
