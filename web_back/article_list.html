@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="css/main.css">
     <script src="js/jquery-1.12.4.min.js"></script>
     <script src="./js/template-web.js"></script>
+    <script src="./js/jquery.twbsPagination.min.js"></script>
 </head>
 
 <body>
@@ -32,8 +33,8 @@
                         </select>
                         <select id="selStatus" name="" class="form-control input-sm">
                             <option value="">所有状态</option>
-                            <option >草稿</option>
-                            <option >已发布</option>
+                            <option>草稿</option>
+                            <option>已发布</option>
                         </select>
                         <button id="btnSearch" class="btn btn-default btn-sm">筛选</button>
                     </form>
@@ -298,52 +299,98 @@
             window.parent.setMenu(1, 1);
         })
 
-        //页面一进来就发送ajax请求,获取所有的文字类别
+
+        //页面一进来就发送ajax请求,获取所有的文章类别
         $.ajax({
             type: 'get',
             url: 'http://localhost:8000/admin/category_search',
             success: function (backData) {
                 console.log(backData);
                 //调用模板方法
-                var resHtml = template('tmp_category',backData);
+                var resHtml = template('tmp_category', backData);
                 $('#selCategory').html(resHtml);
             }
         });
 
 
-        //给筛选按钮设置点击事件,
-        $('#btnSearch').on('click',function(e){
-            e.preventDefault();
+        //声明一个变量,用来定义总页码
+        var mytotalPage = 10;
 
+        //分页插件 效果
+        var $pagination = $('.pagination');
+        var defaultOpts = {
+            totalPages: mytotalPage,
+            visiblePages: 7,
+            first: '首页',
+            last: '尾页',
+            next: '下一页',
+            prev: '上一页',
+            onPageClick: function (event, page) {
+                // console.log(event); //事件
+                // console.log(page);  //点击页码
+                getArticle(page);
+            }
+        }
+        $pagination.twbsPagination(defaultOpts);
+
+
+        //封装的一个获取文章列表的方法
+        function getArticle(myPage) {
             //获取文字类别和文章状态.
             var type = $('#selCategory').val();
             var state = $('#selStatus').val();
             //发送ajax请求
             $.ajax({
                 // type:'get',  如果是get请求,可以不写,因为默认就是get请求.
-                url:'http://localhost:8000/admin/search',
-                data:{
-                    key:"",
-                    type:type,
-                    state:state,
-                    page:1,
-                    perpage:5
+                url: 'http://localhost:8000/admin/search',
+                data: {
+                    key: "",
+                    type: type,
+                    state: state,
+                    page: myPage,
+                    perpage: 5
                 },
-                success:function(backData){
+                success: function (backData) {
                     console.log(backData);
-                    if(backData.code == 200){
+                    if (backData.code == 200) {
                         //利用模板引擎,把他渲染到页面上
-                        var resHtml = template('tmp_article',backData);
+                        var resHtml = template('tmp_article', backData);
                         $('tbody').html(resHtml);
+
+                        //分页插件动态总页码
+                        var totalPages = backData.totalPage; //通过ajax发送请求返回的数据得到真是的总页码
+                        if (mytotalPage != totalPages) { //如果这次得到的真是的总页码,和之前的不一样.
+                            mytotalPage = totalPages; //那就用这次获取的总页码替换刚才的总页码
+                            var currentPage = 1; //下面的代码意思是重新的渲染出新的页码条
+                            $pagination.twbsPagination('destroy');
+                            $pagination.twbsPagination($.extend({}, defaultOpts, {
+                                startPage: currentPage,
+                                totalPages: totalPages
+                            }));
+                        }
+
                     }
                 }
             });
+        }
+
+        //给筛选按钮设置点击事件,
+        $('#btnSearch').on('click', function (e) {
+            e.preventDefault();
+
+            getArticle(1);
+
         });
+
+
+
+
+
 
 
         //页面一进来就要调用一次筛选按钮的方法.
         $('#btnSearch').trigger('click');
-        
+
     </script>
 
 </body>
