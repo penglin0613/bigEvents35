@@ -221,6 +221,44 @@
         <p>电话：0755-****888    粤ICP备*******8号</p>
     </div>
 
+
+    <script src="./js/template-web.js"></script>
+    <!-- 首页文章 模板 -->
+    <script id="tmp_indexArticle" type="text/html">
+        {{each data v}}
+            {{if $index == 0}}
+            <li class="first">
+            {{else}}
+            <li>
+            {{/if}}    
+                <a href="#"><img src="{{v.cover}}" alt=""></a>
+                <p>{{v.title}}</p>
+            </li>
+        {{/each}}
+    </script>
+    <script src="./js/jquery-1.12.4.min.js"></script>
+    <script>
+        $(function(){
+            //发送ajax请求,得到最新的5条新闻.
+            $.ajax({
+                url:'http://localhost:8000/admin/search',
+                data:{
+                    type:"",
+                    state:'',
+                    page:1,
+                    perpage:5
+                },
+                success:function(backData){
+                    console.log(backData);
+                    if(backData.code == 200){
+                        var resHtml = template('tmp_indexArticle',backData);
+                        $('.focus_list').html(resHtml);
+                    }
+                }
+            })
+
+        });
+    </script>
 </body>
 
 </html>
