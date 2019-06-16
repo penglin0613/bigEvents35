@@ -15,6 +15,7 @@
     <script src="js/jedate/js/jedate.js"></script>
     <script src="js/tinymce/js/tinymce/tinymce.min.js"></script>
     <script src="js/tinymce/js/tinymce_setup.js"></script>
+    <script src="./js/template-web.js"></script>
 </head>
 
 <body>
@@ -82,14 +83,32 @@
     </div>
 
 
+    <!-- 文章类别模板 -->
+    <script id="tmp_article_cate" type="text/html">
+        {{each data v}}
+        <option value="{{v.id}}">{{v.name}}</option>
+        {{/each}}
+    </script>
     <script>
-        $(function(){
+        $(function () {
 
             //文章封面图片预览.
-            $('#exampleInputFile').on('change',function(){
+            $('#exampleInputFile').on('change', function () {
                 var icon = this.files[0];
                 var url = URL.createObjectURL(icon);
-                $(this).prev().prev().attr('src',url);
+                $(this).prev().prev().attr('src', url);
+            });
+
+            //获取文章类别,通过模板引擎显示在下拉框中
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8000/admin/category_search',
+                success: function (backData) {
+                    //console.log(backData);
+                    //调用模板方法
+                    var resHtml = template('tmp_article_cate',backData);
+                    $('.form-control').html(resHtml);
+                }
             });
 
 
